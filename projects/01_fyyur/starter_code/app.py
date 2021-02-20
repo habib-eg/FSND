@@ -47,7 +47,6 @@ class Show(db.Model):
     start_time = db.Column(DateTime, nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
     artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-    image_link = db.Column(db.String(500), default="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80")
     artist = db.relationship("Artist", backref="artist", lazy=True)
     venue = db.relationship("Venue", backref="venue", lazy=True)
 
@@ -246,8 +245,7 @@ def search_venues():
     #     }]
     # }
 
-    print(request.form)
-    search_term = request.form["search_term"]
+    search_term = request.form.get("search_term")
     search = "%{}%".format(search_term)
     data = Venue.query.filter(Venue.name.like(search)).all()
     response = {
@@ -362,24 +360,19 @@ def create_venue_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
     try:
-        form = VenueForm(formdata=request.form)
-        if form.validate_on_submit():
-
-            print(request.form.getlist(key='genres'))
-            venue = Venue(
-                name=request.form['name'],
-                city=request.form['city'],
-                state=request.form['state'],
-                phone=request.form['phone'],
-                address=request.form['address'],
-                genres=request.form.getlist(key='genres'),
-                facebook_link=request.form['facebook_link'],
-                image_link=request.form['image_link'],
-            )
-            db.session.add(venue)
-            db.session.commit()
-            print(venue.venue_image_link)
-            flash('Venue ' + request.form['name'] + ' was successfully listed!')
+        venue = Venue(
+            name=request.form.get('name'),
+            city=request.form.get('city'),
+            state=request.form.get('state'),
+            phone=request.form.get('phone'),
+            address=request.form.get('address'),
+            genres=request.form.getlist(key='genres'),
+            facebook_link=request.form.get('facebook_link'),
+            image_link=request.form.get('image_link'),
+        )
+        db.session.add(venue)
+        db.session.commit()
+        flash('Venue ' + request.form.get('name') + ' was successfully listed!')
     except:
         db.session.rollback()
         print(sys.exc_info())
@@ -556,17 +549,16 @@ def edit_artist_submission(artist_id):
     # artist record with ID <artist_id> using the new attributes
     artist = Artist.query.filter_by(id=artist_id).first_or_404()
     try:
-        print(request.form.getlist('genres'))
-        artist.name = request.form['name']
-        artist.city = request.form['city']
-        artist.state = request.form['state']
-        artist.phone = request.form['phone']
-        artist.address = request.form['address']
+        artist.name = request.form.get('name')
+        artist.city = request.form.get('city')
+        artist.state = request.form.get('state')
+        artist.phone = request.form.get('phone')
+        artist.address = request.form.get('address')
         artist.genres = request.form.getlist('genres')
-        artist.facebook_link = request.form['facebook_link']
-        artist.image_link = request.form['image_link']
+        artist.facebook_link = request.form.get('facebook_link')
+        artist.image_link = request.form.get('image_link')
         db.session.commit()
-        flash('Artist ' + request.form['name'] + ' was successfully updated!')
+        flash('Artist ' + request.form.get('name') + ' was successfully updated!')
     except:
         db.session.rollback()
         print(sys.exc_info())
@@ -604,17 +596,16 @@ def edit_venue_submission(venue_id):
     # venue record with ID <venue_id> using the new attributes
     venue = Venue.query.filter_by(id=venue_id).first_or_404()
     try:
-        print(request.form['address'])
-        venue.name = request.form['name']
-        venue.city = request.form['city']
-        venue.state = request.form['state']
-        venue.phone = request.form['phone']
-        venue.address = request.form['address']
-        venue.genres = request.form['genres']
-        venue.facebook_link = request.form['facebook_link']
-        venue.image_link = request.form['image_link']
+        venue.name = request.form.get('name')
+        venue.city = request.form.get('city')
+        venue.state = request.form.get('state')
+        venue.phone = request.form.get('phone')
+        venue.address = request.form.get('address')
+        venue.genres = request.form.getlist('genres')
+        venue.facebook_link = request.form.get('facebook_link')
+        venue.image_link = request.form.get('image_link')
         db.session.commit()
-        flash('Venue ' + request.form['name'] + ' was successfully updated!')
+        flash('Venue ' + request.form.get('name') + ' was successfully updated!')
     except:
         db.session.rollback()
         print(sys.exc_info())
@@ -640,18 +631,17 @@ def create_artist_submission():
     # TODO: modify data to be the data object returned from db insertion
     try:
         artist = Artist(
-            name=request.form['name'],
-            city=request.form['city'],
-            state=request.form['state'],
-            phone=request.form['phone'],
-            genres=request.form['genres'],
-            facebook_link=request.form['facebook_link'],
-            image_link=request.form['image_link'],
+            name=request.form.get('name'),
+            city=request.form.get('city'),
+            state=request.form.get('state'),
+            phone=request.form.get('phone'),
+            genres=request.form.getlist('genres'),
+            facebook_link=request.form.get('facebook_link'),
+            image_link=request.form.get('image_link'),
         )
         db.session.add(artist)
         db.session.commit()
-        print(artist)
-        flash('Artist ' + request.form['name'] + ' was successfully listed!')
+        flash('Artist ' + request.form.get('name') + ' was successfully listed!')
     except:
         db.session.rollback()
         print(sys.exc_info())
@@ -734,14 +724,12 @@ def create_show_submission():
     # TODO: insert form data as a new Show record in the db, instead
     try:
         show = Show(
-            artist_id=request.form['artist_id'],
-            venue_id=request.form['venue_id'],
-            start_time=request.form['start_time'],
-            image_link=request.form['image_link'],
+            artist_id=request.form.get('artist_id'),
+            venue_id=request.form.get('venue_id'),
+            start_time=request.form.get('start_time'),
         )
         db.session.add(show)
         db.session.commit()
-        print(show)
         flash('Show was successfully listed!')
     except:
         db.session.rollback()
