@@ -16,17 +16,25 @@ db = SQLAlchemy()
 
 
 class Show(db.Model):
-    __tablename__ = 'Show'
+    __tablename__ = 'shows'
     id = db.Column(db.Integer, primary_key=True)
     start_time = db.Column(db.DateTime, nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
     artist = db.relationship("Artist", backref="artist", lazy=True)
     venue = db.relationship("Venue", backref="venue", lazy=True)
 
+    def create(self):
+       db.session.add(self)
+       db.session.commit()
+
+    def delete(self):
+       db.session.delete(self)
+       db.session.commit()
+
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venues'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -38,7 +46,15 @@ class Venue(db.Model):
     image_link = db.Column(db.String(500),
                            default="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80")
     facebook_link = db.Column(db.String(120))
-    shows = db.relationship(Show, lazy=True)
+    shows = db.relationship("Show", lazy=True)
+
+    def create(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
     def format(self):
         past_shows = []
@@ -77,7 +93,7 @@ class Venue(db.Model):
 
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'artists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -88,6 +104,14 @@ class Artist(db.Model):
     image_link = db.Column(db.String(500), default="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80")
     facebook_link = db.Column(db.String(120))
     shows = db.relationship("Show", lazy=True)
+
+    def create(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
     def format(self):
         past_shows = []
